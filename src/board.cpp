@@ -3,7 +3,6 @@
 #include <stdexcept>
 #include <sstream>
 
-// see if I can #include <hash_map> from SGI STL
 namespace ConnectFour
 {
 	Board::Board(const std::string &description, char current, char other)
@@ -52,12 +51,22 @@ namespace ConnectFour
 		assert((currentPlayer & otherPlayer) == 0);
 	}
 
-	std::string Board::getDescription() const
+	void Board::setSpace(int row, int column, bool forOtherPlayer, bool empty)
+	{
+		int bit = (Board::height - row)*(Board::width + 1) - column - 1;
+		currentPlayer[bit] = !empty && !forOtherPlayer;
+		otherPlayer[bit] = !empty && forOtherPlayer;
+	}
+
+	std::string Board::getDescription(int row) const
 	{
 		std::ostringstream oss;
 		
-		int bit = (Board::width + 1)*Board::height - 1;
-		for (; bit > 0; --bit)
+		assert(row < Board::height);
+
+		int bit = (Board::width + 1)*(row < 0 ? Board::height : (Board::height - row)) - 1;
+		int endBit = row < 0 ? 0 : (bit - Board::width);
+		for (; bit > endBit; --bit)
 		{
 			if (bit % (Board::width + 1) == 0)
 			{
@@ -85,5 +94,36 @@ namespace ConnectFour
 	{  
 		os << b.getDescription(); 
 		return os;
+	}
+
+	bool Board::isWin(bool forOtherPlayer) const
+	{
+		Board::bitset board = forOtherPlayer ? otherPlayer : currentPlayer;
+
+		// Horizontal connections
+		Board::bitset b = board & (board >> 1);
+		b = b & (b >> 1);
+		b = b & (b >> 1);
+		if (b.any()) return true;
+
+		// Vertical connections
+		b = board & board >> (Board::width + 1);
+		b = b & b >> (Board::width + 1);
+		b = b & b >> (Board::width + 1);
+		if (b.any()) return true;
+
+		// Diagonal / connections
+		b = board & board >> (Board::width + 2);
+		b = b & b >> (Board::width + 2);
+		b = b & b >> (Board::width + 2);
+		if (b.any()) return true;
+
+		// Diagonal \ connections
+		b = board & board >> (Board::width);
+		b = b & b >> (Board::width);
+		b = b & b >> (Board::width);
+		if (b.any()) return true;
+
+		return false;
 	}
 }
