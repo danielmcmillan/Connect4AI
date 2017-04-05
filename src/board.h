@@ -2,6 +2,7 @@
 #include <string>
 #include <bitset>
 #include <iostream>
+#include <tr1/array>
 
 namespace ConnectFour
 {
@@ -11,21 +12,37 @@ namespace ConnectFour
 		static const int width = 7;
 		static const int height = 6;
 
-		Board() {}
+		// Swap turns with the other player (i.e. swap all pieces)
+		void swap()
+		{
+			currentPlayer ^= otherPlayer;
+			otherPlayer ^= currentPlayer;
+			currentPlayer ^= otherPlayer;
+		}
 
-		// Construct a Board based on the specified description.
-		// Current and other specify the character representing the players in the description.
-		Board(const std::string &decription, char current=currentPlayerChar, char other=otherPlayerChar);
+		// Sets whether the specified space is occupied by the current player or empty
+		void setSpace(int column, int row, bool occupied);
 
-		// Set the specified space to be owned by a player or empty
-		void setSpace(int row, int column, bool forOtherPlayer, bool empty = false);
+		// Clear all pieces of both players from the board
+		void clear() { currentPlayer = 0; otherPlayer = 0; }
 
-		// Check whether a player has connected 4
-		// Checks currentPlayer unless forOtherPlayer is true.
-		bool isWin(bool forOtherPlayer = false) const;
+		// Check whether the current player has connected 4
+		bool isWin() const;
 
-		// Return a string representation for the board
+		// Get the total number of pieces for the current player
+		int count() const { return currentPlayer.count(); }
+
+		// Count the number connections of different sizes
+		// Returns an array: { exactly 2, exactly 3, atleast 4 }
+		typedef std::tr1::array<int, 3> connectionsArray;
+		connectionsArray countConnections() const;
+
+		// Return a string representation for the board with red as the current player
 		std::string getDescription(int row = -1) const;
+
+		// Set the board state based on the given description
+		void setFromDescription(const std::string &description);
+
 		friend std::ostream& operator<<(std::ostream& os, const Board& b);
 
 	protected:
@@ -37,6 +54,9 @@ namespace ConnectFour
 		*/
 		typedef std::bitset<(width + 1)*height> bitset;
 		bitset currentPlayer, otherPlayer;
+
+		// The amount to shift for each direction when finding connections (horizontal, vertical, forward/backward diagonal)
+		static const int shiftAmounts[4];
 
 		// Representation for players in the description.
 		static const char currentPlayerChar = 'r', otherPlayerChar = 'y', noPieceChar = '.';

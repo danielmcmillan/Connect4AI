@@ -5,17 +5,128 @@
 
 namespace ConnectFour
 {
-	Board::Board(const std::string &description, char current, char other)
+	const int Board::shiftAmounts[] = {1, Board::width + 1, Board::width + 2, Board::width};
+
+	void Board::setSpace(int column, int row, bool occupied)
 	{
+		int bit = (Board::height - row)*(Board::width + 1) - column - 1;
+		currentPlayer[bit] = occupied;
+		otherPlayer[bit] = false;
+	}
+
+	bool Board::isWin() const
+	{
+		// // Horizontal connections
+		// Board::bitset b = currentPlayer & (currentPlayer >> 1);
+		// b = b & (b >> 1);
+		// b = b & (b >> 1);
+		// if (b.any()) return true;
+
+		// // Vertical connections
+		// b = currentPlayer & currentPlayer >> (Board::width + 1);
+		// b = b & b >> (Board::width + 1);
+		// b = b & b >> (Board::width + 1);
+		// if (b.any()) return true;
+
+		// // Diagonal / connections
+		// b = currentPlayer & currentPlayer >> (Board::width + 2);
+		// b = b & b >> (Board::width + 2);
+		// b = b & b >> (Board::width + 2);
+		// if (b.any()) return true;
+
+		// // Diagonal \ connections
+		// b = currentPlayer & currentPlayer >> (Board::width);
+		// b = b & b >> (Board::width);
+		// b = b & b >> (Board::width);
+		// if (b.any()) return true;
+
+		// Check for connections in each direction
+		for (int shift = 0; shift < sizeof(shiftAmounts)/sizeof(*shiftAmounts); ++shift)
+		{
+			Board::bitset b = currentPlayer & (currentPlayer >> shiftAmounts[shift]);
+			b = b & (b >> shiftAmounts[shift]);
+			b = b & (b >> shiftAmounts[shift]);
+			if (b != 0) return true;
+		}
+
+		return false;
+	}
+
+	Board::connectionsArray Board::countConnections() const
+	{
+		connectionsArray connections = {0};
+
+		// Count the connections in each direction
+		for (int shift = 0; shift < sizeof(shiftAmounts)/sizeof(*shiftAmounts); ++shift)
+		{
+			Board::bitset b = currentPlayer;
+			std::tr1::array<int, 4> counts = {0};
+
+			// Count the number of pieces remaining after each shift
+			// 1 is removed from each remaining group of pieces, so the difference in counts can be used to calculate how many groups are atleast a particular size
+			for (std::tr1::array<int, 4>::iterator count = counts.begin(); count != counts.end(); ++count)
+			{
+				b = b & (b >> shiftAmounts[shift]);
+				*count = b.count();
+			}
+
+			int atleast2 = counts[0] - counts[1];
+			int atleast3 = counts[1] - counts[2];
+			int atleast4 = counts[2] - counts[3];
+
+			connections[0] += atleast2 - atleast3; // Exactly 2
+			connections[1] += atleast3 - atleast4; // Exactly 3
+			connections[2] += atleast4;
+		}
+
+		return connections;
+	}
+
+	std::string Board::getDescription(int row) const
+	{
+		std::ostringstream oss;
+		
+		assert(row < Board::height);
+
+		int bit = (Board::width + 1)*(row < 0 ? Board::height : (Board::height - row)) - 1;
+		int endBit = row < 0 ? 0 : (bit - Board::width);
+		for (; bit > endBit; --bit)
+		{
+			if (bit % (Board::width + 1) == 0)
+			{
+				// Row seperator bit
+				oss << rowSeperatorChar;
+			}
+			else if (currentPlayer[bit])
+			{
+				oss << currentPlayerChar;
+			}
+			else if (otherPlayer[bit])
+			{
+				oss << otherPlayerChar;
+			}
+			else
+			{
+				oss << noPieceChar;
+			}
+		}
+
+		return oss.str();
+	}
+
+	void Board::setFromDescription(const std::string &description)
+	{
+		clear();
+		
 		// Set the bits for the board, starting at the most significant
 		int bit = 0;
 		for (std::string::const_iterator i = description.begin(); i != description.end(); ++i)
 		{
-			if (*i == current)
+			if (*i == currentPlayerChar)
 			{
 				currentPlayer |= 1;
 			}
-			else if (*i == other)
+			else if (*i == otherPlayerChar)
 			{
 				otherPlayer |= 1;
 			}
@@ -51,79 +162,9 @@ namespace ConnectFour
 		assert((currentPlayer & otherPlayer) == 0);
 	}
 
-	void Board::setSpace(int row, int column, bool forOtherPlayer, bool empty)
-	{
-		int bit = (Board::height - row)*(Board::width + 1) - column - 1;
-		currentPlayer[bit] = !empty && !forOtherPlayer;
-		otherPlayer[bit] = !empty && forOtherPlayer;
-	}
-
-	std::string Board::getDescription(int row) const
-	{
-		std::ostringstream oss;
-		
-		assert(row < Board::height);
-
-		int bit = (Board::width + 1)*(row < 0 ? Board::height : (Board::height - row)) - 1;
-		int endBit = row < 0 ? 0 : (bit - Board::width);
-		for (; bit > endBit; --bit)
-		{
-			if (bit % (Board::width + 1) == 0)
-			{
-				// Row seperator bit
-				oss << rowSeperatorChar;
-			}
-			else if (currentPlayer[bit])
-			{
-				oss << currentPlayerChar;
-			}
-			else if (otherPlayer[bit])
-			{
-				oss << otherPlayerChar;
-			}
-			else
-			{
-				oss << noPieceChar;
-			}
-		}
-
-		return oss.str();
-	}
-
 	std::ostream& operator<<(std::ostream& os, const Board& b)  
 	{  
 		os << b.getDescription(); 
 		return os;
-	}
-
-	bool Board::isWin(bool forOtherPlayer) const
-	{
-		Board::bitset board = forOtherPlayer ? otherPlayer : currentPlayer;
-
-		// Horizontal connections
-		Board::bitset b = board & (board >> 1);
-		b = b & (b >> 1);
-		b = b & (b >> 1);
-		if (b.any()) return true;
-
-		// Vertical connections
-		b = board & board >> (Board::width + 1);
-		b = b & b >> (Board::width + 1);
-		b = b & b >> (Board::width + 1);
-		if (b.any()) return true;
-
-		// Diagonal / connections
-		b = board & board >> (Board::width + 2);
-		b = b & b >> (Board::width + 2);
-		b = b & b >> (Board::width + 2);
-		if (b.any()) return true;
-
-		// Diagonal \ connections
-		b = board & board >> (Board::width);
-		b = b & b >> (Board::width);
-		b = b & b >> (Board::width);
-		if (b.any()) return true;
-
-		return false;
 	}
 }
