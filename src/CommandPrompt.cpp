@@ -1,6 +1,10 @@
+#define NDEBUG
+
 #include <iostream>
 #include <sstream>
 #include <cassert>
+#include <cstdlib>
+#include <ctime>
 #include <stdexcept>
 #include <tr1/array>
 #include <fstream>
@@ -125,8 +129,45 @@ void load(const string &name)
     }
 }
 
+void play(int column, bool checkOnly = false)
+{
+    if (column >= 0 && column < Board::width && board.canPlay(column))
+    {
+        std::cout << "Valid move" << std::endl;
+        if (!checkOnly)
+        {
+            board.play(column);
+        }
+    }
+    else
+    {
+        std::cout << "Invalid move" << std::endl;
+    }
+}
+
+void random(int pieces)
+{
+    if (pieces < 0)
+    {
+        pieces = std::rand() % (Board::width*Board::height);
+    }
+    while (pieces > 0)
+    {
+        int column = std::rand() % Board::width;
+        if (board.canPlay(column))
+        {
+            board.play(column);
+        }
+        --pieces;
+
+        board.swap();
+    }
+}
+
 int main(int argc, char **argv)
 {
+    std::srand(std::time(NULL));
+
     std::cout << "ConnectFour command prompt" << std::endl;
 
     string line;
@@ -187,6 +228,18 @@ int main(int argc, char **argv)
             string name;
             iss >> name;
             load(name);
+        }
+        else if (command == "canplay" || command == "play")
+        {
+            int column = -1;
+            iss >> column;
+            play(column, command == "canplay");
+        }
+        else if (command == "random")
+        {
+            int pieces = -1;
+            iss >> pieces;
+            random(pieces);
         }
         else if (command != "")
         {

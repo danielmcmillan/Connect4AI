@@ -9,6 +9,8 @@ namespace ConnectFour
 
 	void Board::setSpace(int column, int row, bool occupied)
 	{
+		assert(column >= 0 && row >= 0 && column < Board::width && row < Board::height);
+		
 		int bit = (Board::height - row)*(Board::width + 1) - column - 1;
 		currentPlayer[bit] = occupied;
 		otherPlayer[bit] = false;
@@ -16,30 +18,6 @@ namespace ConnectFour
 
 	bool Board::isWin() const
 	{
-		// // Horizontal connections
-		// Board::bitset b = currentPlayer & (currentPlayer >> 1);
-		// b = b & (b >> 1);
-		// b = b & (b >> 1);
-		// if (b.any()) return true;
-
-		// // Vertical connections
-		// b = currentPlayer & currentPlayer >> (Board::width + 1);
-		// b = b & b >> (Board::width + 1);
-		// b = b & b >> (Board::width + 1);
-		// if (b.any()) return true;
-
-		// // Diagonal / connections
-		// b = currentPlayer & currentPlayer >> (Board::width + 2);
-		// b = b & b >> (Board::width + 2);
-		// b = b & b >> (Board::width + 2);
-		// if (b.any()) return true;
-
-		// // Diagonal \ connections
-		// b = currentPlayer & currentPlayer >> (Board::width);
-		// b = b & b >> (Board::width);
-		// b = b & b >> (Board::width);
-		// if (b.any()) return true;
-
 		// Check for connections in each direction
 		for (int shift = 0; shift < sizeof(shiftAmounts)/sizeof(*shiftAmounts); ++shift)
 		{
@@ -80,6 +58,32 @@ namespace ConnectFour
 		}
 
 		return connections;
+	}
+
+	bool Board::canPlay(int column) const
+	{
+		assert(column >= 0 && column < Board::width);
+
+		// Check that the corresponding bit in the top row is zero
+		return ((currentPlayer ^ otherPlayer) & (Board::bitset(1) << (Board::width - column))) == 0;
+	}
+
+	void Board::play(int column)
+	{
+		assert(canPlay(column));
+
+		Board::bitset board = currentPlayer ^ otherPlayer;
+		// Initialise mask with bit corresponding to the column set in bottom row
+		Board::bitset mask = Board::bitset(1) << ((Board::width + 1)*Board::height - column - 1);
+
+		// Move bit up 1 row at a time until it is in a free spot
+		while ((mask & board) != 0)
+		{
+			mask >>= (Board::width + 1);
+		}
+
+		// Add the bit to the current player
+		currentPlayer |= mask;
 	}
 
 	std::string Board::getDescription(int row) const

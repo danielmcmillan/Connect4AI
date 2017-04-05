@@ -32,6 +32,13 @@ namespace ConnectFour
 		// Get the total number of pieces for the current player
 		int count() const { return currentPlayer.count(); }
 
+		// Check whether playing in the specified column is a legal move.
+		// Column must be valid.
+		bool canPlay(int column) const;
+
+		// Play in the specified column (must be legal)
+		void play(int column);
+
 		// Count the number connections of different sizes
 		// Returns an array: { exactly 2, exactly 3, atleast 4 }
 		typedef std::tr1::array<int, 3> connectionsArray;
