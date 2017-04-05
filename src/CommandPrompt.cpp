@@ -29,7 +29,7 @@ void setBoard(string &description)
     }
     catch (std::invalid_argument &e)
     {
-        std::cerr << "Invalid description: " << e.what() << std::endl;
+        std::cout << "Invalid description: " << e.what() << std::endl;
     }
 }
 
@@ -50,7 +50,7 @@ void setSpace(int column, int row, const string &piece)
     }
     else
     {
-        std::cerr << "Invalid arguments: <column> <row>" << std::endl;
+        std::cout << "Invalid arguments: <column> <row>" << std::endl;
     }
     if (piece == "yellow")
     {
@@ -87,6 +87,44 @@ void printCount()
     std::cout << "4+-in-a-row: " << connections[2] << std::endl;
 }
 
+void save(const string &name)
+{
+    if (name.empty())
+    {
+        std::cout << "No name given" << std::endl;
+        return;
+    }
+    std::ofstream file((name + ".stash").c_str());
+    if (file.good())
+    {
+        file << board;
+    }
+    else
+    {
+        std::cout << "Failed to save board" << std::endl;
+    }
+}
+
+void load(const string &name)
+{
+    if (name.empty())
+    {
+        std::cout << "No name given" << std::endl;
+        return;
+    }
+    std::ifstream file((name + ".stash").c_str());
+    if (file.good())
+    {
+        string description;
+        file >> description;
+        board.setFromDescription(description);
+    }
+    else
+    {
+        std::cout << "Failed to load board" << std::endl;
+    }
+}
+
 int main(int argc, char **argv)
 {
     std::cout << "ConnectFour command prompt" << std::endl;
@@ -113,7 +151,7 @@ int main(int argc, char **argv)
             }
             else
             {
-                std::cerr << "No description given" << std::endl;
+                std::cout << "No description given" << std::endl;
             }
         }
         else if (command == "print")
@@ -138,9 +176,21 @@ int main(int argc, char **argv)
         {
             printCount();
         }
+        else if (command == "save")
+        {
+            string name;
+            iss >> name;
+            save(name);
+        }
+        else if (command == "load")
+        {
+            string name;
+            iss >> name;
+            load(name);
+        }
         else if (command != "")
         {
-            std::cerr << "Invalid command" << std::endl;
+            std::cout << "Invalid command" << std::endl;
         }
         printBoard();
         std::cout << "> ";
