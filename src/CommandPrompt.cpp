@@ -2,13 +2,15 @@
 #include <sstream>
 #include <cassert>
 #include <stdexcept>
+#include <tr1/array>
+#include <fstream>
 
 #include "board.h"
 
 using namespace ConnectFour;
 using std::string;
 
-Board b;
+Board board;
 
 void makeLowerCase(string &str)
 {
@@ -22,12 +24,37 @@ void setBoard(string &description)
 {
     try
     {
-        b = Board(description);
+        board.setFromDescription(description);
         std::cout << "Board updated" << std::endl;
     }
     catch (std::invalid_argument &e)
     {
         std::cerr << "Invalid description: " << e.what() << std::endl;
+    }
+}
+
+void setSpace(int column, int row, const string &piece)
+{
+    if (piece == "yellow")
+    {
+        board.swap();
+    }
+    if (row >= 0 && column >= 0 && row < Board::height && column < Board::width)
+    {
+        board.setSpace(column, row, piece != "clear");
+    }
+    else if (row == -1 && column == -1 && piece == "clear")
+    {
+        // Clear when no arguments are given
+        board.clear();
+    }
+    else
+    {
+        std::cerr << "Invalid arguments: <column> <row>" << std::endl;
+    }
+    if (piece == "yellow")
+    {
+        board.swap();
     }
 }
 
@@ -46,9 +73,18 @@ void printBoard()
 
     for (int r = Board::height - 1; r >= 0; --r)
     {
-        std::cout << r << b.getDescription(r) << r << std::endl;
+        std::cout << r << board.getDescription(r) << r << std::endl;
     }
     std::cout << oss.str();
+}
+
+void printCount()
+{
+    Board::connectionsArray connections = board.countConnections();
+    std::cout << "Total pieces: " << board.count() << std::endl;
+    std::cout << "2-in-a-row: " << connections[0] << std::endl;
+    std::cout << "3-in-a-row: " << connections[1] << std::endl;
+    std::cout << "4+-in-a-row: " << connections[2] << std::endl;
 }
 
 int main(int argc, char **argv)
@@ -82,27 +118,25 @@ int main(int argc, char **argv)
         }
         else if (command == "print")
         {
-            std::cout << b << std::endl;
+            std::cout << board << std::endl;
+        }
+        else if (command == "swap")
+        {
+            board.swap();
         }
         else if (command == "red" || command == "yellow" || command == "clear")
         {
-            int row, column;
-            iss >> row;
-            iss >> column;
-            if (iss && row >= 0 && column >= 0 && row < Board::height && column < Board::width)
-            {
-                bool clear = command == "clear";
-                bool otherPlayer = command == "yellow";
-                b.setSpace(row, column, otherPlayer, clear);
-            }
-            else
-            {
-                std::cerr << "Invalid arguments: <row:0-5> <column:0-6>" << std::endl;
-            }
+            int column = -1, row = -1;
+            iss >> column; iss >> row;
+            setSpace(column, row, command);
         }
-        else if (command == "check")
+        else if (command == "iswin")
         {
-            std::cout << (b.isWin() ? "won" : "not won") << std::endl;
+            std::cout << (board.isWin() ? "won" : "not won") << std::endl;
+        }
+        else if (command == "count")
+        {
+            printCount();
         }
         else if (command != "")
         {
