@@ -1,7 +1,5 @@
-CPP_FILES = $(wildcard src/*.cpp)
-OBJ_FILES := $(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
-# Filter out unshared code
-SHARED_OBJ_FILES := $(filter-out obj/AutoMarked.o obj/CommandPrompt.o obj/Tournament.o, $(OBJ_FILES))
+H_FILES = $(wildcard src/*.h)
+OBJ_FILES := $(addprefix obj/,$(notdir $(H_FILES:.h=.o)))
 
 CC = g++
 CFLAGS = -g -Wall -pedantic -std=gnu++98
@@ -11,16 +9,16 @@ LD_FLAGS =
 
 all: AutoMarked CommandPrompt
 
-AutoMarked: obj/AutoMarked.o $(SHARED_OBJ_FILES)
+AutoMarked: obj/AutoMarked.o $(OBJ_FILES)
 	$(CC) $(LD_FLAGS) -o $@ $^
 
-# Tournament: obj/Tournament.o $(SHARED_OBJ_FILES)
+# Tournament: obj/Tournament.o $(OBJ_FILES)
 # 	$(CC) $(LD_FLAGS) -o $@ $^
 
-CommandPrompt: obj/CommandPrompt.o $(SHARED_OBJ_FILES)
+CommandPrompt: obj/CommandPrompt.o $(OBJ_FILES)
 	$(CC) $(LD_FLAGS) -o $@ $^
 
-obj/%.o: src/%.cpp
+obj/%.o: src/%.cpp $(H_FILES)
 	$(CC) $(CC_FLAGS) -c -o $@ $<
 
 clean:
