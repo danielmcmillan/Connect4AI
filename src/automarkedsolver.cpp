@@ -60,13 +60,26 @@ namespace ConnectFour
             b.play(col);
             b.swap(); // Current player is now the other player
             int value;
-            bestMove(b, &value, depth + 1, alpha, beta);
+            bestMove(b, &value, depth + 1, -beta, -alpha);
             // The move is evaluated in terms of the other player, so invert it
             value = -value;
             if (value > bestValue)
             {
                 bestValue = value;
                 move = col;
+            }
+            // Update alpha
+            if (prune)
+            {
+                if (value > alpha)
+                {
+                    alpha = value;
+                }
+                if (alpha >= beta)
+                {
+                    // This branch will be too high for the previous player to choose it
+                    break;
+                }
             }
         }
 
@@ -78,7 +91,7 @@ namespace ConnectFour
     {
         nodesExamined = 0;
         int value;
-        return bestMove(board, &value, 0, std::numeric_limits<int>::max(), std::numeric_limits<int>::min());
+        return bestMove(board, &value, 0, std::numeric_limits<int>::min() + 1, std::numeric_limits<int>::max() - 1);
     }
 
     int AutomarkedSolver::numberOfNodesExamined() const
