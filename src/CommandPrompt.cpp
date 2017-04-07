@@ -121,9 +121,14 @@ void load(const string &name)
     std::ifstream file((name + ".stash").c_str());
     if (file.good())
     {
-        string description;
-        file >> description;
-        board.setFromDescription(description);
+        try
+        {
+        file >> board;
+        }
+        catch (std::invalid_argument &e)
+        {
+            std::cout << "Saved board is invalid: " << e.what() << std::endl;
+        }
     }
     else
     {

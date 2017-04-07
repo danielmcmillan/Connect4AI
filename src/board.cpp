@@ -171,4 +171,11 @@ namespace ConnectFour
 		os << b.getDescription(); 
 		return os;
 	}
+
+	std::istream& operator>>(std::istream& is, Board& b)
+	{
+		std::string description;
+		is >> description;
+		b.setFromDescription(description);
+	}
 }

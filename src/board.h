@@ -51,6 +51,7 @@ namespace ConnectFour
 		void setFromDescription(const std::string &description);
 
 		friend std::ostream& operator<<(std::ostream& os, const Board& b);
+		friend std::istream& operator>>(std::istream& is, Board& b);
 
 	protected:
 		/*
