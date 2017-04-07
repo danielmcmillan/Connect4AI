@@ -1,4 +1,4 @@
-#define NDEBUG
+// #define NDEBUG
 
 #include <iostream>
 #include <sstream>
@@ -10,11 +10,13 @@
 #include <fstream>
 
 #include "board.h"
+#include "automarkedsolver.h"
 
 using namespace ConnectFour;
 using std::string;
 
 Board board;
+Solver *solver = 0;
 
 void makeLowerCase(string &str)
 {
@@ -164,6 +166,59 @@ void random(int pieces)
     }
 }
 
+void setSolver(string name, std::istream &args)
+{
+    if (name == "automarked")
+    {
+        int maxDepth = 0, prune = 0;
+        args >> maxDepth >> prune;
+        if (solver) delete solver;
+        solver = new AutomarkedSolver(maxDepth, prune);
+        std::cout << "Set solver to AutomarkedSolver with maxDepth=" << maxDepth << " and pruning " << (prune ? "enabled" : "disabled") << std::endl;
+    }
+    else
+    {
+        std::cout << "Invalid solver name" << std::endl;
+    }
+}
+
+void solveMove(bool play)
+{
+    if (solver)
+    {
+        int move = solver->solve(board);
+        if (move != -1)
+        {
+            std::cout << "Best move: " << move << std::endl;
+            if (play)
+            {
+                board.play(move);
+                board.swap();
+            }
+        }
+        else
+        {
+            std::cout << "Unable to solve" << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "No solver is set" << std::endl;
+    }
+}
+
+void printSolverNodeCount()
+{
+    if (solver)
+    {
+        std::cout << solver->numberOfNodesExamined() << std::endl;
+    }
+    else
+    {
+        std::cout << "No solver is set" << std::endl;
+    }
+}
+
 int main(int argc, char **argv)
 {
     std::srand(std::time(NULL));
@@ -240,6 +295,20 @@ int main(int argc, char **argv)
             int pieces = -1;
             iss >> pieces;
             random(pieces);
+        }
+        else if (command == "solver")
+        {
+            string solverName;
+            iss >> solverName;
+            setSolver(solverName, iss);
+        }
+        else if (command == "solve" || command == "auto")
+        {
+            solveMove(command == "auto");
+        }
+        else if (command == "nodes")
+        {
+            printSolverNodeCount();
         }
         else if (command != "")
         {
