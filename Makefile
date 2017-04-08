@@ -14,8 +14,8 @@ all: AutoMarked CommandPrompt
 AutoMarked: obj/AutoMarked.o $(SHARED_OBJ_FILES)
 	$(CC) $(LD_FLAGS) -o $@ $^
 
-# Tournament: obj/Tournament.o $(SHARED_OBJ_FILES)
-# 	$(CC) $(LD_FLAGS) -o $@ $^
+Tournament: obj/Tournament.o $(SHARED_OBJ_FILES)
+	$(CC) $(LD_FLAGS) -o $@ $^
 
 CommandPrompt: obj/CommandPrompt.o $(SHARED_OBJ_FILES)
 	$(CC) $(LD_FLAGS) -o $@ $^

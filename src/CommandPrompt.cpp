@@ -11,6 +11,7 @@
 
 #include "board.h"
 #include "automarkedsolver.h"
+#include "tournamentsolver.h"
 
 using namespace ConnectFour;
 using std::string;
@@ -171,15 +172,24 @@ void random(int pieces)
     }
 }
 
-void setSolver(string name, std::istream &args)
+void setSolver(const string &name, std::istream &args)
 {
-    if (name == "automarked")
+    if (name == "am")
     {
         int maxDepth = 0, prune = 0;
         args >> maxDepth >> prune;
         if (solver) delete solver;
         solver = new AutomarkedSolver(maxDepth, prune);
         std::cout << "Set solver to AutomarkedSolver with maxDepth=" << maxDepth << " and pruning " << (prune ? "enabled" : "disabled") << std::endl;
+    }
+    else if (name == "t")
+    {
+        int timeout = 900, startDepth = 1, depthStep = 1, maxDepth = -1;
+        args >> timeout >> startDepth >> depthStep >> maxDepth;
+        if (solver) delete solver;
+        solver = new TournamentSolver(timeout, startDepth, depthStep, maxDepth);
+        std::cout << "Set solver to TournamentSolver with timeout " << timeout << "ms, start depth "
+            << startDepth << ", depth step " << depthStep << " and max depth " << maxDepth << std::endl;
     }
     else
     {
@@ -191,7 +201,10 @@ void solveMove(bool play)
 {
     if (solver)
     {
+        std::clock_t clocks = std::clock();
         int move = solver->solve(board);
+        clocks = std::clock() - clocks;
+
         if (move != -1)
         {
             std::cout << "Best move: " << move << std::endl;
@@ -205,6 +218,7 @@ void solveMove(bool play)
         {
             std::cout << "Unable to solve" << std::endl;
         }
+        std::cout << "Time taken: " << ((clocks * 1000) / CLOCKS_PER_SEC) << " ms" << std::endl;
     }
     else
     {
