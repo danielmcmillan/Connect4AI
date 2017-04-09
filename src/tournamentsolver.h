@@ -18,16 +18,43 @@ namespace ConnectFour
 
     private:
         const int maxSolveTime;
+
+        // Search depth parameters
         const int startDepth;
         const int depthStep;
         const int maxDepth;
 
         // The number of clock ticks to end computation at
         std::clock_t endTicks;
-        bool outOfTime;
         static const int clocksPerMillisecond = CLOCKS_PER_SEC / 1000;
+        // Whether to complete computation as soon as possible
+        bool outOfTime;
 
+        // Enum for types of board evaluation
+        enum EvaluationType
+        {
+            evaluation_exact,
+            evaluation_belowAlpha, // Value is an upper bound
+            evaluation_aboveBeta // Value is a lower bound
+        };
+        // Struct to store data about a board evaluation for future use
+        struct BoardEvaluation
+        {
+            Board::Hash hash;
+            int move; // Move determined to be best for current player
+            int value; // Minimax value for the position based on current player
+            int height; // Height of the subtree rooted at this position (depends on iteration)
+            EvaluationType type;
+        };
+        // Transposition table
+        static const int transpositionTableSize = 1048576; // 2^20 - 24MB
+        BoardEvaluation *table;
+
+        // Statistics for last solve
         int nodesExamined;
+        int tableHits; // Times required position was in table
+        int tableReplacements; // Collisions where old value was replaced
+        int tableIgnores; // Collisions where old value was left
 
         int bestMove(const Board &board, int *outValue, int depth, int alpha, int beta);
         inline static int score(const Board &board);
