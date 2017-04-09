@@ -12,7 +12,7 @@ using namespace ConnectFour;
 
 int main(int argc, char **argv)
 {
-    if(argc <= 4)
+    if (argc <= 4)
     {
         std::cerr << "Expected more arguments" << std::endl;
         return -1;

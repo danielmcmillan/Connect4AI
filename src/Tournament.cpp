@@ -6,13 +6,13 @@
 #include <sstream>
 
 #include "board.h"
-#include "automarkedsolver.h"
+#include "tournamentsolver.h"
 
 using namespace ConnectFour;
 
 int main(int argc, char **argv)
 {
-    if(argc <= 2)
+    if (argc <= 2)
     {
         std::cerr << "Expected more arguments" << std::endl;
         return -1;

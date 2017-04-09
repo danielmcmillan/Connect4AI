@@ -6,8 +6,8 @@
 namespace ConnectFour
 {
     AutomarkedSolver::AutomarkedSolver(int maxDepth, bool prune) :
-        maxDepth(maxDepth),
         prune(prune),
+        maxDepth(maxDepth),
         nodesExamined(0)
     {
         assert(maxDepth >= 0);
