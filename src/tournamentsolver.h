@@ -14,7 +14,7 @@ namespace ConnectFour
         TournamentSolver(int maxSolveTime, int startDepth, int depthStep, int maxDepth = -1);
 
         int solve(const Board &board);
-        int numberOfNodesExamined() const;
+        void printStatistics(std::ostream &out) const;
 
     private:
         const int maxSolveTime;

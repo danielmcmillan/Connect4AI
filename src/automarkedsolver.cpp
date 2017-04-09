@@ -1,6 +1,7 @@
 #include "automarkedsolver.h"
 #include <cassert>
 #include <limits>
+#include <iostream>
 
 namespace ConnectFour
 {
@@ -97,6 +98,11 @@ namespace ConnectFour
     int AutomarkedSolver::numberOfNodesExamined() const
     {
         return nodesExamined;
+    }
+
+    void AutomarkedSolver::printStatistics(std::ostream &out) const
+    {
+        out << "Nodes examined: " << nodesExamined << std::endl;
     }
 
     // Compute score for current player

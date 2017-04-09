@@ -12,6 +12,7 @@ namespace ConnectFour
 
         int solve(const Board &board);
         int numberOfNodesExamined() const;
+        void printStatistics(std::ostream &out) const;
 
     private:
         const bool prune;

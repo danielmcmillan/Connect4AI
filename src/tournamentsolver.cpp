@@ -118,9 +118,9 @@ namespace ConnectFour
         return move;
     }
 
-    int TournamentSolver::numberOfNodesExamined() const
+    void TournamentSolver::printStatistics(std::ostream &out) const
     {
-        return nodesExamined;
+        out << "Nodes examined: " << nodesExamined << std::endl;
     }
 
     // Compute score for current player

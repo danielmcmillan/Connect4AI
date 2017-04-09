@@ -226,11 +226,11 @@ void solveMove(bool play)
     }
 }
 
-void printSolverNodeCount()
+void printSolverStatistics()
 {
     if (solver)
     {
-        std::cout << solver->numberOfNodesExamined() << std::endl;
+        solver->printStatistics(std::cout);
     }
     else
     {
@@ -325,9 +325,9 @@ int main(int argc, char **argv)
         {
             solveMove(command == "auto");
         }
-        else if (command == "nodes")
+        else if (command == "stats")
         {
-            printSolverNodeCount();
+            printSolverStatistics();
         }
         else if (command != "")
         {
