@@ -184,7 +184,7 @@ void setSolver(const string &name, std::istream &args)
     }
     else if (name == "t")
     {
-        int timeout = 900, startDepth = 1, depthStep = 1, maxDepth = -1;
+        int timeout = 10000, startDepth = 9, depthStep = 1, maxDepth = 9;
         args >> timeout >> startDepth >> depthStep >> maxDepth;
         if (solver) delete solver;
         solver = new TournamentSolver(timeout, startDepth, depthStep, maxDepth);
@@ -328,6 +328,10 @@ int main(int argc, char **argv)
         else if (command == "stats")
         {
             printSolverStatistics();
+        }
+        else if (command == "hash")
+        {
+            std::cout << board.getHash() << std::endl;
         }
         else if (command != "")
         {

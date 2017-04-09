@@ -1,4 +1,5 @@
 #include "board.h"
+#include "zobristnumbers.h"
 #include <cassert>
 #include <stdexcept>
 #include <sstream>
@@ -7,19 +8,42 @@ namespace ConnectFour
 {
 	const int Board::shiftAmounts[] = {1, Board::width + 1, Board::width + 2, Board::width};
 
+	void Board::swap()
+	{
+		currentPlayer ^= otherPlayer;
+		otherPlayer ^= currentPlayer;
+		currentPlayer ^= otherPlayer;
+		currentHash ^= otherHash;
+		otherHash ^= currentHash;
+		currentHash ^= otherHash;
+	}
+
 	void Board::setSpace(int column, int row, bool occupied)
 	{
 		assert(column >= 0 && row >= 0 && column < Board::width && row < Board::height);
 		
 		int bit = (Board::height - row)*(Board::width + 1) - column - 1;
 		currentPlayer[bit] = occupied;
-		otherPlayer[bit] = false;
+
+		Hash currentRandom = zobristNumbers[Board::width*Board::height - 1 - row*Board::width + column];
+		Hash otherRandom = zobristNumbers[2*Board::width*Board::height - 1 - row*Board::width + column];
+		// XOR in/out updated currentPlayer slot 
+		currentHash ^= currentRandom;
+		otherHash ^= otherRandom;
+
+		if (otherPlayer[bit])
+		{
+			otherPlayer[bit] = false;
+			// XOR out otherPlayer slot
+			currentHash ^= otherRandom;
+			otherHash ^= currentRandom;
+		}
 	}
 
 	bool Board::isWin() const
 	{
 		// Check for connections in each direction
-		for (int shift = 0; shift < sizeof(shiftAmounts)/sizeof(*shiftAmounts); ++shift)
+		for (int shift = 0; shift < shiftDirections; ++shift)
 		{
 			Board::bitset b = currentPlayer & (currentPlayer >> shiftAmounts[shift]);
 			b = b & (b >> shiftAmounts[shift]);
@@ -30,12 +54,44 @@ namespace ConnectFour
 		return false;
 	}
 
+	bool Board::canPlay(int column) const
+	{
+		assert(column >= 0 && column < Board::width);
+
+		// Check that the corresponding bit in the top row is zero
+		return ((currentPlayer ^ otherPlayer) & (Board::bitset(1) << (Board::width - column))) == 0;
+	}
+
+	void Board::play(int column)
+	{
+		assert(canPlay(column));
+
+		Board::bitset board = currentPlayer ^ otherPlayer;
+		// Initialise mask with bit corresponding to the column set in bottom row
+		Board::bitset mask = Board::bitset(1) << ((Board::width + 1)*Board::height - column - 1);
+		int row = 0;
+
+		// Move bit up 1 row at a time until it is in a free spot
+		while ((mask & board) != 0)
+		{
+			mask >>= (Board::width + 1);
+			++row;
+		}
+
+		// Add the bit to the current player
+		currentPlayer |= mask;
+
+		// Update hash
+		currentHash ^= zobristNumbers[Board::width*Board::height - 1 - row*Board::width + column];
+		otherHash ^= zobristNumbers[2*Board::width*Board::height - 1 - row*Board::width + column];
+	}
+
 	Board::connectionsArray Board::countConnections() const
 	{
 		connectionsArray connections = {0};
 
 		// Count the connections in each direction
-		for (int shift = 0; shift < sizeof(shiftAmounts)/sizeof(*shiftAmounts); ++shift)
+		for (int shift = 0; shift < shiftDirections; ++shift)
 		{
 			Board::bitset b = currentPlayer;
 			std::tr1::array<int, 4> counts = {0};
@@ -60,30 +116,35 @@ namespace ConnectFour
 		return connections;
 	}
 
-	bool Board::canPlay(int column) const
+	void Board::resetHashes()
 	{
-		assert(column >= 0 && column < Board::width);
+		currentHash = 0;
+		otherHash = 0;
+		bitset c = currentPlayer;
+		bitset o = otherPlayer;
 
-		// Check that the corresponding bit in the top row is zero
-		return ((currentPlayer ^ otherPlayer) & (Board::bitset(1) << (Board::width - column))) == 0;
-	}
-
-	void Board::play(int column)
-	{
-		assert(canPlay(column));
-
-		Board::bitset board = currentPlayer ^ otherPlayer;
-		// Initialise mask with bit corresponding to the column set in bottom row
-		Board::bitset mask = Board::bitset(1) << ((Board::width + 1)*Board::height - column - 1);
-
-		// Move bit up 1 row at a time until it is in a free spot
-		while ((mask & board) != 0)
+		for (int bit = 0; bit < Board::width*Board::height; ++bit)
 		{
-			mask >>= (Board::width + 1);
+			// Skip the row-separating bits
+			if ((bit % Board::width) == 0)
+			{
+				c >>= 1;
+				o >>= 1;
+			}
+			// If a piece exists, xor in the corresponding random number
+			if ((c & bitset(1)) != 0)
+			{
+				currentHash ^= zobristNumbers[bit];
+				otherHash ^= zobristNumbers[Board::width*Board::height + bit];
+			}
+			if ((o & bitset(1)) != 0)
+			{
+				otherHash ^= zobristNumbers[bit];
+				currentHash ^= zobristNumbers[Board::width*Board::height + bit];
+			}
+			c >>= 1;
+			o >>= 1;
 		}
-
-		// Add the bit to the current player
-		currentPlayer |= mask;
 	}
 
 	std::string Board::getDescription(int row) const
@@ -164,9 +225,11 @@ namespace ConnectFour
 		#endif
 
 		assert((currentPlayer & otherPlayer) == 0);
+
+		resetHashes();
 	}
 
-	std::ostream& operator<<(std::ostream& os, const Board& b)  
+	std::ostream& operator<<(std::ostream& os, const Board& b)
 	{  
 		os << b.getDescription(); 
 		return os;
@@ -177,5 +240,6 @@ namespace ConnectFour
 		std::string description;
 		is >> description;
 		b.setFromDescription(description);
+		return is;
 	}
 }

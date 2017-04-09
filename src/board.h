@@ -17,18 +17,13 @@ namespace ConnectFour
 		static const int height = 6;
 
 		/// @brief Swap turns with the other player (i.e. swap all pieces).
-		void swap()
-		{
-			currentPlayer ^= otherPlayer;
-			otherPlayer ^= currentPlayer;
-			currentPlayer ^= otherPlayer;
-		}
+		void swap();
 
 		/// @brief Sets whether the specified space is occupied by the current player or empty.
 		void setSpace(int column, int row, bool occupied);
 
 		/// @brief Clear all pieces of both players from the board.
-		void clear() { currentPlayer = 0; otherPlayer = 0; }
+		void clear() { currentPlayer = 0; otherPlayer = 0; currentHash = 0; otherHash = 0; }
 
 		/// @brief Check whether the current player has connected 4.
 		bool isWin() const;
@@ -43,6 +38,12 @@ namespace ConnectFour
 		/// @brief Play in the specified column.
 		/// @param column The column to play in. It must exist and canPlay(column) must be true.
 		void play(int column);
+
+		/// @brief Type for representing a Board hash.
+		typedef long unsigned int Hash;
+		
+		/// @brief Gets the hash value for the current board state.
+		Hash getHash() const { return currentHash; }
 
 		/// @brief Array for storing the number of connections of size 2 and 3.
 		typedef std::tr1::array<int, 3> connectionsArray;
@@ -73,11 +74,19 @@ namespace ConnectFour
 		typedef std::bitset<(width + 1)*height> bitset;
 		bitset currentPlayer, otherPlayer;
 
+		// Hash for each player, which can be used to compute a hash for new moves
+		Hash currentHash;
+		Hash otherHash;
+
 		// The amount to shift for each direction when finding connections (horizontal, vertical, forward/backward diagonal)
-		static const int shiftAmounts[4];
+		static const int shiftDirections = 4;
+		static const int shiftAmounts[shiftDirections];
 
 		// Representation for players in the description.
 		static const char currentPlayerChar = 'r', otherPlayerChar = 'y', noPieceChar = '.';
 		static const char rowSeperatorChar = ',';
+
+		// Recalculate hash values
+		void resetHashes();
 	};
 }
