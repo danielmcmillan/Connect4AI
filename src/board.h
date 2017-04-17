@@ -31,6 +31,9 @@ namespace ConnectFour
 		/// @brief Get a count of the current player's pieces on the board.
 		int count() const { return currentPlayer.count(); }
 
+		/// @brief Get a count of both player's pieces on the board.
+		int totalCount() const { return currentPlayer.count() + otherPlayer.count(); }
+
 		/// @brief Check whether playing in the specified column is a legal move.
 		/// @param column The column to check. Must be a valid column.
 		bool canPlay(int column) const;

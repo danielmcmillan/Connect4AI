@@ -56,7 +56,30 @@ namespace ConnectFour
         int tableReplacements; // Collisions where old value was replaced
         int tableIgnores; // Collisions where old value was left
 
+        /// @brief Get the best move and minimax value for the given board
+        /// @param board A board position.
+        /// @param[out] outValue Pointer to integer to write minimax value to.
+        /// @param height The maximum height for the search tree. Must not extend beyond a filled board.
+        /// @param alpha Lower bound for value to search for.
+        /// @param beta Upper board for value to search for.
+        /// @return The move to take from the given board, or -1 if no move was determined.
         int bestMove(const Board &board, int *outValue, int depth, int alpha, int beta);
-        inline static int score(const Board &board);
+
+        /// @brief Play each playable column from the given board and compute the order to explore them in.
+        /// @param boards Array to store the resulting boards for each move
+        /// @param moveOrder Array to store column numbers of moves to explore
+        /// @return Column for a move resulting in a win, or -1 if there is none.
+        int playAllMoves(const Board &board, std::tr1::array<Board, Board::width> *boards, std::tr1::array<int, Board::width> *moveOrder);
+
+        /// @breif Store a board evaluation in the transposition table.
+        ///        If there is a collision, keep the evaluation with the greatest height.
+        void storeInTable(const Board &board, int move, int value, int height, EvaluationType type);
+        
+        /// @breif Get a pointer to the transposition table entry for the given board.
+        BoardEvaluation *tableEntryFor(const Board &board)
+            { return &table[board.getHash() % transpositionTableSize]; }
+
+        /// @brief Compute the score for the current player.
+        static int score(const Board &board);
     };
 }
