@@ -65,11 +65,16 @@ namespace ConnectFour
         /// @return The move to take from the given board, or -1 if no move was determined.
         int bestMove(const Board &board, int *outValue, int depth, int alpha, int beta);
 
-        /// @brief Play each playable column from the given board and compute the order to explore them in.
-        /// @param boards Array to store the resulting boards for each move
-        /// @param moveOrder Array to store column numbers of moves to explore
+        /// @brief Play each playable column from the given board
+        /// @param[out] boards Array to store the resulting boards for move in each column
+        /// @param[out] columns Array to store column numbers of moves to explore
         /// @return Column for a move resulting in a win, or -1 if there is none.
-        int playAllMoves(const Board &board, std::tr1::array<Board, Board::width> *boards, std::tr1::array<int, Board::width> *moveOrder);
+        int playAllMoves(const Board &board, std::tr1::array<Board, Board::width> &boards, std::tr1::array<int, Board::width> &columns);
+
+        /// @brief Sort the columns to play so that more promising moves appear first.
+        /// @param boards Array of boards for each possible move.
+        /// @param columns Array of columns to play in that should be sorted.
+        void orderMoves(const std::tr1::array<Board, Board::width> &boards, std::tr1::array<int, Board::width> &columns);
 
         /// @breif Store a board evaluation in the transposition table.
         ///        If there is a collision, keep the evaluation with the greatest height.

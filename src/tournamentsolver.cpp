@@ -121,7 +121,7 @@ namespace ConnectFour
         // Get the boards and columns of moves to explore
         std::tr1::array<Board, Board::width> boards;
         std::tr1::array<int, Board::width> moveOrder;
-        int winningMove = playAllMoves(board, &boards, &moveOrder);
+        int winningMove = playAllMoves(board, boards, moveOrder);
         if (winningMove != -1)
         {
             // Return from winning moves without exploring any other moves
@@ -129,6 +129,7 @@ namespace ConnectFour
             storeInTable(board, winningMove, *outValue, height, evaluation_exact);
             return winningMove;
         }
+        orderMoves(boards, moveOrder);
 
         // Check whether out of time
         if ((height % 4) == 0) // TODO Only check the time occasionally
@@ -185,31 +186,69 @@ namespace ConnectFour
         return move;
     }
 
-    int TournamentSolver::playAllMoves(const Board &board, std::tr1::array<Board, Board::width> *boards, std::tr1::array<int, Board::width> *moveOrder)
+    int TournamentSolver::playAllMoves(const Board &board, std::tr1::array<Board, Board::width> &boards, std::tr1::array<int, Board::width> &columns)
     {
         // Play each column
         for (int i = 0; i < Board::width; ++i)
         {
             if (board.canPlay(i))
             {
-                (*moveOrder)[i] = i;
-                (*boards)[i] = board;
-                (*boards)[i].play(i);
-                if ((*boards)[i].isWin())
+                columns[i] = i;
+                boards[i] = board;
+                boards[i].play(i);
+                if (boards[i].isWin())
                 {
                     return i;
                 }
-                (*boards)[i].swap();
+                boards[i].swap();
             }
             else
             {
-                (*moveOrder)[i] = -1;
+                columns[i] = -1;
             }
         }
         return -1;
+    }
 
-        // TODO Order moves by estimate in table
-        // If a move is missing completely: ??. Prefer to default to middle moves. Cheap heuristic, maybe based only on column.
+    // Comparison function to sort by descending move value
+    struct MoveCompare
+    {
+        const std::tr1::array<int, Board::width> &moveValues;
+        MoveCompare(const std::tr1::array<int, Board::width> &values) : moveValues(values) {}
+        bool operator()(int col1, int col2)
+        {
+            if (col1 == -1) return false;
+            if (col2 == -1) return true;
+            return moveValues[col1] > moveValues[col2];
+        }
+    };
+
+    void TournamentSolver::orderMoves(const std::tr1::array<Board, Board::width> &boards, std::tr1::array<int, Board::width> &columns)
+    {
+        // Get values for each move
+        std::tr1::array<int, Board::width> moveValues;
+        for (int i = 0; i < Board::width; ++i)
+        {
+            int column = columns[i];
+            if (column != -1)
+            {
+                const Board &board = boards[column];
+                BoardEvaluation *eval = tableEntryFor(board);
+                if (eval->hash == board.getHash() && eval->type == evaluation_exact)
+                {
+                    // Value based on stored value from previous iteration
+                    moveValues[column] = eval->value;
+                }
+                else
+                {
+                    moveValues[column] = 0;
+                }
+                // Adjust value based on closeness to centre position (assume centre is better)
+                moveValues[column] += 100000 * ((Board::width/2) - std::abs(columns[i] - (Board::width/2)));
+            }
+        }
+
+        std::sort(columns.begin(), columns.end(), MoveCompare(moveValues));
     }
 
     void TournamentSolver::storeInTable(const Board &board, int move, int value, int height, EvaluationType type)
