@@ -55,9 +55,21 @@ namespace ConnectFour
 		/// @return A connectionsArray: { exactly 2, exactly 3, atleast 4 }.
 		connectionsArray countConnections() const;
 
+		/// @brief Stores counts of different types of threats for both players.
+		struct ThreatInfo
+		{
+			int allThreats[2]; // Threats that may be possible to exploit
+			int groundedThreats[2]; // Threats with a piece by any player below them (they can be played immediately)
+			int doubleThreats[2]; // Threats with another threat below them, they can always be exploited
+		};
+
+		/// @brief Get information about the 
+		/// @return The difference in number of threats.
+		ThreatInfo getThreatInfo() const;
+
 		/// @brief Get a string representation for the board with red as the current player.
 		/// @param row Optional parameter specifying a single row to limit the description to.
-		std::string getDescription(int row = -1) const;
+		std::string getDescription(int row = -1, bool showThreats = false) const;
 
 		/// @brief Set the board state based on the given description
 		/// @param description String description of a board. invalid_argument is thrown if it is invalid.
@@ -77,6 +89,12 @@ namespace ConnectFour
 		typedef std::bitset<(width + 1)*height> bitset;
 		bitset currentPlayer, otherPlayer;
 
+		/// @breif Get a bitmask for a board with piece in every slot
+		static const bitset &getBoardMask();
+
+		/// @breif Get a bitmask for the bottom row
+		static const bitset &getBottomMask();
+
 		// Hash for each player, which can be used to compute a hash for new moves
 		Hash currentHash;
 		Hash otherHash;
@@ -91,5 +109,14 @@ namespace ConnectFour
 
 		// Recalculate hash values
 		void resetHashes();
+
+		/// @brief Get a board of possible threats: slots that would allow connecting-four.
+		/// @param bad Whether to find threats against current player. Otherwise finds threats against other player.
+		bitset getThreats(bool bad) const;
+
+		/// @brief Unset bits in threats that correspond to threats that can't be exploited
+		/// @param[in,out] threats The threats to filter
+		/// @param otherThreats The other player's threats which may prevent exploiting our own threats.
+		static void filterThreats(Board::bitset &threats, const Board::bitset &otherThreats);
 	};
 }

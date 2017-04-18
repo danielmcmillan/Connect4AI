@@ -106,13 +106,12 @@ namespace ConnectFour
             if (board.count() + other.count() == Board::width*Board::height)
             {
                 // Draw (full board)
-                // TODO Paremeters for heuristic/utility
                 *outValue = 0;
             }
             else
             {
                 // Non-terminal leaf node, use heuristic
-                *outValue = score(board) - score(other);
+                *outValue = score(board);
             }
             storeInTable(board, -1, *outValue, height, evaluation_exact);
             return -1;
@@ -125,7 +124,7 @@ namespace ConnectFour
         if (winningMove != -1)
         {
             // Return from winning moves without exploring any other moves
-            *outValue = 10000; // TODO Paremeters for heuristic/utility
+            *outValue = 10000;
             storeInTable(board, winningMove, *outValue, height, evaluation_exact);
             return winningMove;
         }
@@ -275,7 +274,7 @@ namespace ConnectFour
 
     int TournamentSolver::score(const Board &board)
     {
-        Board::connectionsArray connections = board.countConnections();
-        return board.count() + 10*connections[0] + 100*connections[1] + 1000*connections[2];
+        Board::ThreatInfo info = board.getThreatInfo();
+        return info.allThreats[0] - info.allThreats[1] + 10*(info.groundedThreats[0] - info.groundedThreats[1] + info.doubleThreats[0] - info.doubleThreats[1]);
     }
 }

@@ -116,6 +116,73 @@ namespace ConnectFour
 		return connections;
 	}
 
+	Board::ThreatInfo Board::getThreatInfo() const
+	{
+		Board::ThreatInfo info;
+
+		Board::bitset threats[2];
+		threats[0] = getThreats(false);
+		threats[1] = getThreats(true);
+		filterThreats(threats[0], threats[1]);
+		filterThreats(threats[1], threats[0]);
+
+		for (int i = 0; i < 2; ++i)
+		{
+			info.allThreats[i] = threats[i].count();
+
+			info.groundedThreats[i] = (threats[i] & (((currentPlayer ^ otherPlayer) >> (Board::width + 1)) | getBottomMask())).count();
+
+			info.doubleThreats[i] = (threats[i] & (threats[i] >> (Board::width + 1))).count();
+		}
+
+		return info;
+	}
+
+	Board::bitset Board::getThreats(bool bad) const
+	{
+		const Board::bitset emptySpots = (~(currentPlayer ^ otherPlayer)) & getBoardMask();
+		const Board::bitset player = (bad) ? otherPlayer : currentPlayer;
+		Board::bitset threats;
+
+		for (int shift = 0; shift < shiftDirections; ++shift)
+		{
+			Board::bitset m = emptySpots;
+			Board::bitset p = player;
+			m &= (p <<= shiftAmounts[shift]);
+			m &= (p <<= shiftAmounts[shift]);
+			m &= (p << shiftAmounts[shift]);
+			threats |= m;
+
+			m = emptySpots;
+			p = player;
+			m &= (p >>= shiftAmounts[shift]);
+			m &= (p >>= shiftAmounts[shift]);
+			m &= (p >> shiftAmounts[shift]);
+			threats |= m;
+
+			m = emptySpots;
+			p = player;
+			m &= (p >> shiftAmounts[shift]);
+			m &= (p <<= shiftAmounts[shift]);
+			m &= (p << shiftAmounts[shift]);
+			threats |= m;
+
+			m = emptySpots;
+			p = player;
+			m &= (p << shiftAmounts[shift]);
+			m &= (p >>= shiftAmounts[shift]);
+			m &= (p >> shiftAmounts[shift]);
+			threats |= m;
+		}
+		return threats;
+	}
+
+	void Board::filterThreats(Board::bitset &threats, const Board::bitset &otherThreats)
+	{
+		// Filter out threats immediately above a threat from the other player
+		threats &= ~(otherThreats >> (Board::width + 1));
+	}
+
 	void Board::resetHashes()
 	{
 		currentHash = 0;
@@ -147,11 +214,37 @@ namespace ConnectFour
 		}
 	}
 
-	std::string Board::getDescription(int row) const
+	const Board::bitset &Board::getBoardMask()
+	{
+		static Board::bitset mask;
+		if (mask == 0)
+		{
+			Board::bitset b(1);
+			for (int i = 0; i < Board::height; ++i)
+			{
+				mask |= b;
+				b <<= (Board::width + 1);
+			}
+			mask = ~mask;
+		}
+
+		return mask;
+	}
+
+	const Board::bitset &Board::getBottomMask()
+	{
+		static Board::bitset bottom = Board::bitset().set() << (((Board::width + 1)*Board::height) - Board::width);
+		return bottom;
+	}
+
+	std::string Board::getDescription(int row, bool showThreats) const
 	{
 		std::ostringstream oss;
 		
 		assert(row < Board::height);
+
+		Board::bitset cThreats = getThreats(false);
+		Board::bitset oThreats = getThreats(true);
 
 		int bit = (Board::width + 1)*(row < 0 ? Board::height : (Board::height - row)) - 1;
 		int endBit = row < 0 ? 0 : (bit - Board::width);
@@ -172,7 +265,25 @@ namespace ConnectFour
 			}
 			else
 			{
-				oss << noPieceChar;
+				if (showThreats)
+				{
+					if (oThreats[bit])
+					{
+						oss << '!';
+					}
+					else if (cThreats[bit])
+					{
+						oss << '.';
+					}
+					else
+					{
+						oss << ' ';
+					}
+				}
+				else
+				{
+					oss << noPieceChar;
+				}
 			}
 		}
 
