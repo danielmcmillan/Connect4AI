@@ -47,7 +47,7 @@ namespace ConnectFour
             EvaluationType type;
         };
         // Transposition table
-        static const int transpositionTableSize = 1048576; // 2^20 - 24MB
+        static const int transpositionTableSize = 262144; // 2^18 - 6MB
         BoardEvaluation *table;
 
         // Statistics for last solve

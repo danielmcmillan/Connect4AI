@@ -46,8 +46,7 @@ namespace ConnectFour
 		for (int shift = 0; shift < shiftDirections; ++shift)
 		{
 			Board::bitset b = currentPlayer & (currentPlayer >> shiftAmounts[shift]);
-			b = b & (b >> shiftAmounts[shift]);
-			b = b & (b >> shiftAmounts[shift]);
+			b = b & (b >> 2*shiftAmounts[shift]);
 			if (b != 0) return true;
 		}
 

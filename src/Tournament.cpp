@@ -1,4 +1,4 @@
-// #define NDEBUG
+#define NDEBUG
 
 #include <iostream>
 #include <cassert>
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
             board.swap();
         }
         
-        TournamentSolver solver(950, 7, 1);
+        TournamentSolver solver(950, 8, 1, -1);
         std::cout << solver.solve(board) << std::endl;
     }
     catch (std::invalid_argument &e)

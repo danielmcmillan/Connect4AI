@@ -1,4 +1,6 @@
 #pragma once
+
+#define NDEBUG
 #include <string>
 #include <bitset>
 #include <iostream>
