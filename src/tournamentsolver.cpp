@@ -156,11 +156,6 @@ namespace ConnectFour
             // The move is evaluated in terms of the other player, so invert it
             value = -value;
 
-            // if (height == maxDepth)
-            // {
-            //     std::cout << "Column " << column << " has value " << value << std::endl;
-            // }
-
             // Update maximum
             if (value > *outValue)
             {
@@ -237,17 +232,29 @@ namespace ConnectFour
             {
                 const Board &board = boards[column];
                 BoardEvaluation *eval = tableEntryFor(board);
-                if (eval->hash == board.getHash() && eval->type == evaluation_exact)
+                if (eval->hash == board.getHash())
                 {
                     // Value based on stored value from previous iteration
-                    moveValues[column] = eval->value;
+                    // Evaluation stored from previous player, so 
+                    moveValues[column] = -eval->value;
+                    if (eval->type == evaluation_aboveBeta)
+                    {
+                        // Move was too bad to consider exactly
+                        moveValues[column] -= 10000;
+                    }
+                    else if (eval->type == evaluation_belowAlpha)
+                    {
+                        // Move was too good to consider exactly
+                        moveValues[column] += 10000;
+                    }
                 }
                 else
                 {
                     moveValues[column] = 0;
                 }
-                // Adjust value based on closeness to centre position (assume centre is better)
-                moveValues[column] += 100000 * ((Board::width/2) - std::abs(columns[i] - (Board::width/2)));
+
+                // Adjust value to avoid ties based on closeness to centre position (assume centre is better)
+                moveValues[column] += (Board::width/2) - std::abs(column - (Board::width/2));
             }
         }
 
