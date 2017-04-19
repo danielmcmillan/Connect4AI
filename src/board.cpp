@@ -116,6 +116,19 @@ namespace ConnectFour
 		return connections;
 	}
 
+	int Board::countPossibleConnections(bool forOtherPlayer) const
+	{
+		Board::bitset bits = (~(forOtherPlayer ? currentPlayer : otherPlayer)) & getBoardMask();
+		int count = 0;
+		for (int shift = 0; shift < shiftDirections; ++shift)
+		{
+			Board::bitset b = bits & (bits >> shiftAmounts[shift]);
+			b &= (b >> 2*shiftAmounts[shift]);
+			count += b.count();
+		}
+		return count;
+	}
+
 	Board::ThreatInfo Board::getThreatInfo() const
 	{
 		Board::ThreatInfo info;

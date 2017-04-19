@@ -55,6 +55,8 @@ namespace ConnectFour
 		/// @return A connectionsArray: { exactly 2, exactly 3, atleast 4 }.
 		connectionsArray countConnections() const;
 
+		int countPossibleConnections(bool forOtherPlayer = false) const;
+
 		/// @brief Stores counts of different types of threats for both players.
 		struct ThreatInfo
 		{

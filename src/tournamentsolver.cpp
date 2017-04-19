@@ -101,9 +101,7 @@ namespace ConnectFour
         // Handle leaf nodes
         if (height == 0)
         {
-            Board other = board;
-            other.swap();
-            if (board.count() + other.count() == Board::width*Board::height)
+            if (board.totalCount() == Board::width*Board::height)
             {
                 // Draw (full board)
                 *outValue = 0;
@@ -113,7 +111,7 @@ namespace ConnectFour
                 // Non-terminal leaf node, use heuristic
                 *outValue = score(board);
             }
-            storeInTable(board, -1, *outValue, height, evaluation_exact);
+            storeInTable(board, -1, *outValue, 0, evaluation_exact);
             return -1;
         }
 
@@ -123,8 +121,9 @@ namespace ConnectFour
         int winningMove = playAllMoves(board, boards, moveOrder);
         if (winningMove != -1)
         {
+            // Utility function prefers sooner wins
+            *outValue = (Board::width*Board::height - board.totalCount() + 1) * 1000;
             // Return from winning moves without exploring any other moves
-            *outValue = 10000;
             storeInTable(board, winningMove, *outValue, height, evaluation_exact);
             return winningMove;
         }
@@ -156,6 +155,11 @@ namespace ConnectFour
 
             // The move is evaluated in terms of the other player, so invert it
             value = -value;
+
+            // if (height == maxDepth)
+            // {
+            //     std::cout << "Column " << column << " has value " << value << std::endl;
+            // }
 
             // Update maximum
             if (value > *outValue)
@@ -275,6 +279,9 @@ namespace ConnectFour
     int TournamentSolver::score(const Board &board)
     {
         Board::ThreatInfo info = board.getThreatInfo();
-        return info.allThreats[0] - info.allThreats[1] + 10*(info.groundedThreats[0] - info.groundedThreats[1] + info.doubleThreats[0] - info.doubleThreats[1]);
+        return board.countPossibleConnections(false) - board.countPossibleConnections(true)
+            + 70*(info.allThreats[0] - info.allThreats[1])
+            + 100*(info.groundedThreats[0] - info.groundedThreats[1])
+            + 150*(info.doubleThreats[0] - info.doubleThreats[1]);
     }
 }

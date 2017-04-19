@@ -92,14 +92,12 @@ void printCount()
     std::cout << "2-in-a-row: " << connections[0] << std::endl;
     std::cout << "3-in-a-row: " << connections[1] << std::endl;
     std::cout << "4+-in-a-row: " << connections[2] << std::endl;
-}
-
-void printThreats()
-{
     Board::ThreatInfo threats = board.getThreatInfo();
-    std::cout << "total: " << threats.allThreats[0] << ", " << threats.allThreats[1] << std::endl;
+    std::cout << "threats: " << threats.allThreats[0] << ", " << threats.allThreats[1] << std::endl;
     std::cout << "double: " << threats.doubleThreats[0] << ", " << threats.doubleThreats[1] << std::endl;
     std::cout << "grounded: " << threats.groundedThreats[0] << ", " << threats.groundedThreats[1] << std::endl;
+    int pc = board.countPossibleConnections();
+    std::cout << "possible connections: " << pc << std::endl;
 }
 
 void save(const string &name)
@@ -192,8 +190,8 @@ void setSolver(const string &name, std::istream &args)
     }
     else if (name == "t")
     {
-        int timeout = 10000, startDepth = 9, depthStep = 1, maxDepth = 9;
-        args >> timeout >> startDepth >> depthStep >> maxDepth;
+        int timeout = 100000, startDepth = 9, depthStep = 1, maxDepth = 9;
+        args >> startDepth >> maxDepth >> timeout >> depthStep;
         if (solver) delete solver;
         solver = new TournamentSolver(timeout, startDepth, depthStep, maxDepth);
         std::cout << "Set solver to TournamentSolver with timeout " << timeout << "ms, start depth "
@@ -298,10 +296,6 @@ int main(int argc, char **argv)
         else if (command == "count")
         {
             printCount();
-        }
-        else if (command == "threats")
-        {
-            printThreats();
         }
         else if (command == "save")
         {
