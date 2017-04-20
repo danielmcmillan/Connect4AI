@@ -122,7 +122,7 @@ namespace ConnectFour
         if (winningMove != -1)
         {
             // Utility function prefers sooner wins
-            *outValue = (Board::width*Board::height - board.totalCount() + 1) * 1000;
+            *outValue = (Board::width*Board::height - board.totalCount() + 1) * 10000;
             // Return from winning moves without exploring any other moves
             storeInTable(board, winningMove, *outValue, height, evaluation_exact);
             return winningMove;
@@ -149,8 +149,8 @@ namespace ConnectFour
 
             if (outOfTime)
             {
-                // Return the best move found so far
-                return move;
+                // Stop searching
+                return -1;
             }
 
             // The move is evaluated in terms of the other player, so invert it
