@@ -30,8 +30,19 @@ int main(int argc, char **argv)
             board.swap();
         }
         
-        TournamentSolver solver(950, 8, 1, -1);
-        std::cout << solver.solve(board) << std::endl;
+        TournamentSolver solver(970, 8, 1, -1);
+        int move = solver.solve(board);
+        if (move == 7)
+        {
+            // Skip move
+            return 0;
+        }
+        else if (move == -1)
+        {
+            // Failed to complete iteration, 
+            move = 3;
+        }
+        std::cout << move << std::endl;
     }
     catch (std::invalid_argument &e)
     {

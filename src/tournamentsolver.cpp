@@ -116,8 +116,8 @@ namespace ConnectFour
         }
 
         // Get the boards and columns of moves to explore
-        std::tr1::array<Board, Board::width> boards;
-        std::tr1::array<int, Board::width> moveOrder;
+        std::tr1::array<Board, Board::width + 1> boards;
+        std::tr1::array<int, Board::width + 1> moveOrder;
         int winningMove = playAllMoves(board, boards, moveOrder);
         if (winningMove != -1)
         {
@@ -184,7 +184,7 @@ namespace ConnectFour
         return move;
     }
 
-    int TournamentSolver::playAllMoves(const Board &board, std::tr1::array<Board, Board::width> &boards, std::tr1::array<int, Board::width> &columns)
+    int TournamentSolver::playAllMoves(const Board &board, std::tr1::array<Board, Board::width + 1> &boards, std::tr1::array<int, Board::width + 1> &columns)
     {
         // Play each column
         for (int i = 0; i < Board::width; ++i)
@@ -205,14 +205,20 @@ namespace ConnectFour
                 columns[i] = -1;
             }
         }
+
+        // Pass move
+        boards[Board::width] = board;
+        boards[Board::width].swap();
+        columns[Board::width] = Board::width;
+
         return -1;
     }
 
     // Comparison function to sort by descending move value
     struct MoveCompare
     {
-        const std::tr1::array<int, Board::width> &moveValues;
-        MoveCompare(const std::tr1::array<int, Board::width> &values) : moveValues(values) {}
+        const std::tr1::array<int, Board::width + 1> &moveValues;
+        MoveCompare(const std::tr1::array<int, Board::width + 1> &values) : moveValues(values) {}
         bool operator()(int col1, int col2)
         {
             if (col1 == -1) return false;
@@ -221,11 +227,11 @@ namespace ConnectFour
         }
     };
 
-    void TournamentSolver::orderMoves(const std::tr1::array<Board, Board::width> &boards, std::tr1::array<int, Board::width> &columns)
+    void TournamentSolver::orderMoves(const std::tr1::array<Board, Board::width + 1> &boards, std::tr1::array<int, Board::width + 1> &columns)
     {
         // Get values for each move
-        std::tr1::array<int, Board::width> moveValues;
-        for (int i = 0; i < Board::width; ++i)
+        std::tr1::array<int, Board::width + 1> moveValues;
+        for (int i = 0; i < Board::width + 1; ++i)
         {
             int column = columns[i];
             if (column != -1)
