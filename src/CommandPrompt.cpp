@@ -96,8 +96,6 @@ void printCount()
     std::cout << "threats: " << threats.allThreats[0] << ", " << threats.allThreats[1] << std::endl;
     std::cout << "double: " << threats.doubleThreats[0] << ", " << threats.doubleThreats[1] << std::endl;
     std::cout << "grounded: " << threats.groundedThreats[0] << ", " << threats.groundedThreats[1] << std::endl;
-    int pc = board.countPossibleConnections();
-    std::cout << "possible connections: " << pc << std::endl;
 }
 
 void save(const string &name)

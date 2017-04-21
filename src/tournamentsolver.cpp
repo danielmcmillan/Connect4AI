@@ -292,8 +292,7 @@ namespace ConnectFour
     int TournamentSolver::score(const Board &board)
     {
         Board::ThreatInfo info = board.getThreatInfo();
-        return board.countPossibleConnections(false) - board.countPossibleConnections(true)
-            + 70*(info.allThreats[0] - info.allThreats[1])
+        return 70*(info.allThreats[0] - info.allThreats[1])
             + 100*(info.groundedThreats[0] - info.groundedThreats[1])
             + 150*(info.doubleThreats[0] - info.doubleThreats[1]);
     }
