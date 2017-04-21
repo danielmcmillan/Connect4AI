@@ -25,8 +25,8 @@ namespace ConnectFour
 		int bit = (Board::height - row)*(Board::width + 1) - column - 1;
 		currentPlayer[bit] = occupied;
 
-		Hash currentRandom = zobristNumbers[Board::width*Board::height - 1 - row*Board::width + column];
-		Hash otherRandom = zobristNumbers[2*Board::width*Board::height - 1 - row*Board::width + column];
+		Hash currentRandom = zobristNumbers[Board::width*Board::height - 1 - row*Board::width - column];
+		Hash otherRandom = zobristNumbers[2*Board::width*Board::height - 1 - row*Board::width - column];
 		// XOR in/out updated currentPlayer slot 
 		currentHash ^= currentRandom;
 		otherHash ^= otherRandom;
@@ -81,8 +81,8 @@ namespace ConnectFour
 		currentPlayer |= mask;
 
 		// Update hash
-		currentHash ^= zobristNumbers[Board::width*Board::height - 1 - row*Board::width + column];
-		otherHash ^= zobristNumbers[2*Board::width*Board::height - 1 - row*Board::width + column];
+		currentHash ^= zobristNumbers[Board::width*Board::height - 1 - row*Board::width - column];
+		otherHash ^= zobristNumbers[2*Board::width*Board::height - 1 - row*Board::width - column];
 	}
 
 	Board::connectionsArray Board::countConnections() const

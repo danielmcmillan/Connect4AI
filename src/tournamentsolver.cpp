@@ -260,7 +260,7 @@ namespace ConnectFour
                 }
 
                 // Adjust value to avoid ties based on closeness to centre position (assume centre is better)
-                moveValues[column] += (Board::width/2) - std::abs(column - (Board::width/2));
+                moveValues[column] += 100*((Board::width/2) - std::abs(column - (Board::width/2)));
             }
         }
 
