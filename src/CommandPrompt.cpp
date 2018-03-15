@@ -15,8 +15,8 @@
 using namespace ConnectFour;
 using std::string;
 
-Board board;
-Solver *solver = 0;
+static Board board;
+static Solver *solver = 0;
 
 void makeLowerCase(string &str)
 {

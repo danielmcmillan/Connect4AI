@@ -2,6 +2,9 @@ obj
 AutoMarked
 CommandPrompt
 Tournament
+connect4ai.html
+connect4ai.js
+connect4ai.wasm
 .vscode
 *.stash
 html
