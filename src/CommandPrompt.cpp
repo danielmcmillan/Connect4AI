@@ -1,12 +1,10 @@
-// #define NDEBUG
-
 #include <iostream>
 #include <sstream>
 #include <cassert>
 #include <cstdlib>
 #include <ctime>
 #include <stdexcept>
-#include <tr1/array>
+#include <array>
 #include <fstream>
 
 #include "board.h"

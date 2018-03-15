@@ -4,7 +4,7 @@ OBJ_FILES := $(addprefix obj/,$(notdir $(CPP_FILES:.cpp=.o)))
 SHARED_OBJ_FILES := $(filter-out obj/AutoMarked.o obj/CommandPrompt.o obj/Tournament.o, $(OBJ_FILES))
 
 CC = g++
-CC_FLAGS = -g -Wall -pedantic -std=gnu++98
+CC_FLAGS = -O2 -std=gnu++11 -D NDEBUG
 LD_FLAGS =
 
 .PHONY: all clean
@@ -24,4 +24,4 @@ obj/%.o: src/%.cpp $(H_FILES)
 	$(CC) $(CC_FLAGS) -c -o $@ $<
 
 clean:
-	rm -f obj/* Automarked Tournament CommandPrompt
+	rm -f obj/* AutoMarked Tournament CommandPrompt

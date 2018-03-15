@@ -1,5 +1,3 @@
-#define NDEBUG
-
 #include <iostream>
 #include <cassert>
 #include <stdexcept>
@@ -29,7 +27,7 @@ int main(int argc, char **argv)
         {
             board.swap();
         }
-        
+
         TournamentSolver solver(970, 8, 1, -1);
         int move = solver.solve(board);
         if (move == 7)
@@ -39,7 +37,7 @@ int main(int argc, char **argv)
         }
         else if (move == -1)
         {
-            // Failed to complete iteration, 
+            // Failed to complete iteration,
             move = 3;
         }
         std::cout << move << std::endl;

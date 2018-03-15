@@ -3,7 +3,7 @@
 #include <limits>
 #include <cstring>
 #include <algorithm>
-#include <tr1/array>
+#include <array>
 
 namespace ConnectFour
 {
@@ -116,8 +116,8 @@ namespace ConnectFour
         }
 
         // Get the boards and columns of moves to explore
-        std::tr1::array<Board, Board::width + 1> boards;
-        std::tr1::array<int, Board::width + 1> moveOrder;
+        std::array<Board, Board::width + 1> boards;
+        std::array<int, Board::width + 1> moveOrder;
         int winningMove = playAllMoves(board, boards, moveOrder);
         if (winningMove != -1)
         {
@@ -134,7 +134,7 @@ namespace ConnectFour
         {
             outOfTime = std::clock() >= endTicks;
         }
-        
+
         // Compute the move in the next level with best minimax value for the current player
         int move = -1;
         *outValue = std::numeric_limits<int>::min();
@@ -162,7 +162,7 @@ namespace ConnectFour
                 *outValue = value;
                 move = column;
             }
-            
+
             // Pruning
             if (value > alpha)
             {
@@ -184,7 +184,7 @@ namespace ConnectFour
         return move;
     }
 
-    int TournamentSolver::playAllMoves(const Board &board, std::tr1::array<Board, Board::width + 1> &boards, std::tr1::array<int, Board::width + 1> &columns)
+    int TournamentSolver::playAllMoves(const Board &board, std::array<Board, Board::width + 1> &boards, std::array<int, Board::width + 1> &columns)
     {
         // Play each column
         for (int i = 0; i < Board::width; ++i)
@@ -217,8 +217,8 @@ namespace ConnectFour
     // Comparison function to sort by descending move value
     struct MoveCompare
     {
-        const std::tr1::array<int, Board::width + 1> &moveValues;
-        MoveCompare(const std::tr1::array<int, Board::width + 1> &values) : moveValues(values) {}
+        const std::array<int, Board::width + 1> &moveValues;
+        MoveCompare(const std::array<int, Board::width + 1> &values) : moveValues(values) {}
         bool operator()(int col1, int col2)
         {
             if (col1 == -1) return false;
@@ -227,10 +227,10 @@ namespace ConnectFour
         }
     };
 
-    void TournamentSolver::orderMoves(const std::tr1::array<Board, Board::width + 1> &boards, std::tr1::array<int, Board::width + 1> &columns)
+    void TournamentSolver::orderMoves(const std::array<Board, Board::width + 1> &boards, std::array<int, Board::width + 1> &columns)
     {
         // Get values for each move
-        std::tr1::array<int, Board::width + 1> moveValues;
+        std::array<int, Board::width + 1> moveValues;
         for (int i = 0; i < Board::width + 1; ++i)
         {
             int column = columns[i];
@@ -241,7 +241,7 @@ namespace ConnectFour
                 if (eval->hash == board.getHash())
                 {
                     // Value based on stored value from previous iteration
-                    // Evaluation stored from previous player, so 
+                    // Evaluation stored from previous player, so
                     moveValues[column] = -eval->value;
                     if (eval->type == evaluation_aboveBeta)
                     {

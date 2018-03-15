@@ -1,5 +1,3 @@
-// #define NDEBUG
-
 #include <iostream>
 #include <cassert>
 #include <stdexcept>
@@ -32,7 +30,7 @@ int main(int argc, char **argv)
         {
             board.swap();
         }
-        
+
         AutomarkedSolver solver(depth, enablePruning);
         std::cout << solver.solve(board) << std::endl;
         std::cout << solver.numberOfNodesExamined() << std::endl;

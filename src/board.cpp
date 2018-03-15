@@ -21,13 +21,13 @@ namespace ConnectFour
 	void Board::setSpace(int column, int row, bool occupied)
 	{
 		assert(column >= 0 && row >= 0 && column < Board::width && row < Board::height);
-		
+
 		int bit = (Board::height - row)*(Board::width + 1) - column - 1;
 		currentPlayer[bit] = occupied;
 
 		Hash currentRandom = zobristNumbers[Board::width*Board::height - 1 - row*Board::width - column];
 		Hash otherRandom = zobristNumbers[2*Board::width*Board::height - 1 - row*Board::width - column];
-		// XOR in/out updated currentPlayer slot 
+		// XOR in/out updated currentPlayer slot
 		currentHash ^= currentRandom;
 		otherHash ^= otherRandom;
 
@@ -87,17 +87,17 @@ namespace ConnectFour
 
 	Board::connectionsArray Board::countConnections() const
 	{
-		connectionsArray connections = {0};
+		connectionsArray connections = {};
 
 		// Count the connections in each direction
 		for (int shift = 0; shift < shiftDirections; ++shift)
 		{
 			Board::bitset b = currentPlayer;
-			std::tr1::array<int, 4> counts = {0};
+			std::array<int, 4> counts = {};
 
 			// Count the number of pieces remaining after each shift
 			// 1 is removed from each remaining group of pieces, so the difference in counts can be used to calculate how many groups are atleast a particular size
-			for (std::tr1::array<int, 4>::iterator count = counts.begin(); count != counts.end(); ++count)
+			for (std::array<int, 4>::iterator count = counts.begin(); count != counts.end(); ++count)
 			{
 				b = b & (b >> shiftAmounts[shift]);
 				*count = b.count();
@@ -239,7 +239,7 @@ namespace ConnectFour
 	std::string Board::getDescription(int row, bool showThreats) const
 	{
 		std::ostringstream oss;
-		
+
 		assert(row < Board::height);
 
 		Board::bitset cThreats = getThreats(false);
@@ -292,7 +292,7 @@ namespace ConnectFour
 	void Board::setFromDescription(const std::string &description)
 	{
 		clear();
-		
+
 		// Set the bits for the board, starting at the most significant
 		int bit = 0;
 		for (std::string::const_iterator i = description.begin(); i != description.end(); ++i)
@@ -340,8 +340,8 @@ namespace ConnectFour
 	}
 
 	std::ostream& operator<<(std::ostream& os, const Board& b)
-	{  
-		os << b.getDescription(); 
+	{
+		os << b.getDescription();
 		return os;
 	}
 

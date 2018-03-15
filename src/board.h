@@ -1,10 +1,10 @@
 #pragma once
 
-#define NDEBUG
+#include <cstdint>
 #include <string>
 #include <bitset>
 #include <iostream>
-#include <tr1/array>
+#include <array>
 
 namespace ConnectFour
 {
@@ -45,13 +45,13 @@ namespace ConnectFour
 		void play(int column);
 
 		/// @brief Type for representing a Board hash.
-		typedef long unsigned int Hash;
-		
+		typedef unsigned int Hash;
+
 		/// @brief Gets the hash value for the current board state.
 		Hash getHash() const { return currentHash; }
 
 		/// @brief Array for storing the number of connections of size 2 and 3.
-		typedef std::tr1::array<int, 3> connectionsArray;
+		typedef std::array<int, 3> connectionsArray;
 
 		/// @brief Count the numbers of any connection of size 2, 3 and 4+.
 		/// @return A connectionsArray: { exactly 2, exactly 3, atleast 4 }.
@@ -65,7 +65,7 @@ namespace ConnectFour
 			int doubleThreats[2]; // Threats with another threat below them, they can always be exploited
 		};
 
-		/// @brief Get information about the 
+		/// @brief Get information about the
 		/// @return The difference in number of threats.
 		ThreatInfo getThreatInfo() const;
 
