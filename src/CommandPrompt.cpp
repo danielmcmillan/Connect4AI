@@ -8,6 +8,7 @@
 #include <fstream>
 
 #include "board.h"
+#include "mainsolver.h"
 #include "automarkedsolver.h"
 #include "tournamentsolver.h"
 
@@ -176,7 +177,16 @@ void random(int pieces)
 
 void setSolver(const string &name, std::istream &args)
 {
-    if (name == "am")
+    if (name == "m")
+    {
+        int timeout = 100000, startDepth = 9, depthStep = 1, maxDepth = 9;
+        args >> startDepth >> maxDepth >> timeout >> depthStep;
+        if (solver) delete solver;
+        solver = new MainSolver(timeout, startDepth, depthStep, maxDepth);
+        std::cout << "Set solver to MainSolver with timeout " << timeout << "ms, start depth "
+            << startDepth << ", depth step " << depthStep << " and max depth " << maxDepth << std::endl;
+    }
+    else if (name == "am")
     {
         int maxDepth = 0, prune = 0;
         args >> maxDepth >> prune;

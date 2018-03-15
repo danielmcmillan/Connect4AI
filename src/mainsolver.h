@@ -5,14 +5,14 @@
 
 namespace ConnectFour
 {
-    class TournamentSolver : public Solver
+    class MainSolver : public Solver
     {
     public:
         /// @brief  Construct a solver that uses techniques such as iterative deepening, transposition table to improve performance
         /// @param  targetSolveTime The time in milliseconds that the solver should take to predict the best move.
         /// @param  startDepth The depth of the search tree in the first iteration
         /// @param  depthStep The increase in depth after each iteration
-        TournamentSolver(int maxSolveTime, int startDepth, int depthStep, int maxDepth = -1);
+        MainSolver(int maxSolveTime, int startDepth, int depthStep, int maxDepth = -1);
 
         int solve(const Board &board);
         void printStatistics(std::ostream &out) const;
@@ -70,12 +70,12 @@ namespace ConnectFour
         /// @param[out] boards Array to store the resulting boards for move in each column
         /// @param[out] columns Array to store column numbers of moves to explore
         /// @return Column for a move resulting in a win, or -1 if there is none.
-        int playAllMoves(const Board &board, std::array<Board, Board::width + 1> &boards, std::array<int, Board::width + 1> &columns);
+        int playAllMoves(const Board &board, std::array<Board, Board::width> &boards, std::array<int, Board::width> &columns);
 
         /// @brief Sort the columns to play so that more promising moves appear first.
         /// @param boards Array of boards for each possible move.
         /// @param columns Array of columns to play in that should be sorted.
-        void orderMoves(const std::array<Board, Board::width + 1> &boards, std::array<int, Board::width + 1> &columns);
+        void orderMoves(const std::array<Board, Board::width> &boards, std::array<int, Board::width> &columns);
 
         /// @breif Store a board evaluation in the transposition table.
         ///        If there is a collision, keep the evaluation with the greatest height.
