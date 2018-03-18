@@ -53,6 +53,43 @@ namespace ConnectFour
 		return false;
 	}
 
+	std::string Board::getWinningPiecesDescription(bool forYellow) const
+	{
+		Board::bitset winningPieces = 0;
+		Board::bitset player = forYellow ? otherPlayer : currentPlayer;
+		// Check for connections in each direction
+		for (int shift = 0; shift < shiftDirections; ++shift)
+		{
+			Board::bitset b = player & (player >> shiftAmounts[shift]);
+			b = b & (b >> 2*shiftAmounts[shift]);
+			if (b != 0)
+			{
+				// Restore the original connected pieces.
+				b = b | (b << shiftAmounts[shift]);
+				b = b | (b << 2*shiftAmounts[shift]);
+				winningPieces |= b;
+			}
+		}
+
+		if (winningPieces == 0)
+		{
+			return "";
+		}
+		else
+		{
+			Board winningBoard;
+			if (forYellow)
+			{
+				winningBoard.otherPlayer = winningPieces;
+			}
+			else
+			{
+				winningBoard.currentPlayer = winningPieces;
+			}
+			return winningBoard.getDescription();
+		}
+	}
+
 	bool Board::canPlay(int column) const
 	{
 		assert(column >= 0 && column < Board::width);
@@ -83,6 +120,21 @@ namespace ConnectFour
 		// Update hash
 		currentHash ^= zobristNumbers[Board::width*Board::height - 1 - row*Board::width - column];
 		otherHash ^= zobristNumbers[2*Board::width*Board::height - 1 - row*Board::width - column];
+	}
+
+	int Board::getFreeRow(int column)
+	{
+		Board::bitset board = currentPlayer ^ otherPlayer;
+		// Initialise mask with bit corresponding to the column set in bottom row
+		Board::bitset mask = Board::bitset(1) << ((Board::width + 1)*Board::height - column - 1);
+		int row = 0;
+		// Move bit up 1 row at a time until it is in a free spot
+		while ((mask & board) != 0 && row < Board::height)
+		{
+			mask >>= (Board::width + 1);
+			++row;
+		}
+		return row;
 	}
 
 	Board::connectionsArray Board::countConnections() const

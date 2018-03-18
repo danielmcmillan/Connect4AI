@@ -44,6 +44,11 @@ namespace ConnectFour
 		/// @param column The column to play in. It must exist and canPlay(column) must be true.
 		void play(int column);
 
+		/// @brief Get the row of the bottom-most free spot in a column.
+		/// @param column The column to check for a free spot within.
+		/// @return Index of the row from the bottom. May be outside range of rows if there is no free spot.
+		int getFreeRow(int column);
+
 		/// @brief Type for representing a Board hash.
 		typedef unsigned int Hash;
 
@@ -72,6 +77,10 @@ namespace ConnectFour
 		/// @brief Get a string representation for the board with red as the current player.
 		/// @param row Optional parameter specifying a single row to limit the description to.
 		std::string getDescription(int row = -1, bool showThreats = false) const;
+
+		/// @brief Get a string representation for the current player's board pieces that won the game.
+		/// @return String description, or empty string if the current player hasn't won the game.
+		std::string getWinningPiecesDescription(bool forYellow = false) const;
 
 		/// @brief Set the board state based on the given description
 		/// @param description String description of a board. invalid_argument is thrown if it is invalid.
